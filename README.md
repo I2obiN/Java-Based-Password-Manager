@@ -1,5 +1,5 @@
-# PasswordScrape
-Java Password Scraper for Chrome/Firefox/IE built on JNA and Win32Crypt functions
+# PasswordRecoveryTool
+Java Password Recovery Tool for Chrome/Firefox/IE built on JNA and Win32Crypt functions
 
 Steps:
 
