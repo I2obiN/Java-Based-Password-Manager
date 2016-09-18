@@ -31,7 +31,7 @@ public class jdec extends Crypt32Util {
 		Connection conn = null;
 
 		// Use arguments string for db url
-		String url = "jdbc:sqlite:./logindata.db";
+		String url = "jdbc:sqlite:logindata.db";
 		conn = DriverManager.getConnection(url);
 		
 		// SQL Queries
