@@ -1,5 +1,5 @@
 # PasswordScrape
-Generic Java Password Scraper for Chrome built on JNA and Win32Crypt functions for SQLite db
+Java Password Scraper for Chrome built on JNA and Win32Crypt functions
 
 Steps:
 
