@@ -10,7 +10,7 @@ Java Password Recovery Tool for Chrome/Firefox/IE built on JNA and Win32Crypt fu
    Goal:
    Firefox next, need to get the json file into a byte array, decrypt, then output
 
-Steps:
+## Steps:
 
   1. Download as zip, unzip to Desktop or wherever you'd like.
    
