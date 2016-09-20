@@ -8,7 +8,7 @@ Java Password Recovery Tool for Chrome/Firefox/IE built on JNA and Win32Crypt fu
    jar file will decrypt Chrome passwords and output to text file in working directory
 
    Goal:
-   Firefox next, need to get the json file into a byte array, decrypt, then output
+   Firefox next, get the hard one out of the way first I guess
 
 ## Steps:
 
