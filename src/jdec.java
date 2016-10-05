@@ -20,8 +20,6 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 // SQLite libraries
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -39,11 +37,20 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.jss.*;
 import org.mozilla.jss.CryptoManager.NotInitializedException;
 import org.mozilla.jss.crypto.AlreadyInitializedException;
-import org.mozilla.jss.crypto.CryptoToken;
-import org.mozilla.jss.crypto.SecretDecoderRing;
-import org.mozilla.jss.crypto.SymmetricKey;
+//import org.mozilla.jss.crypto.CryptoToken;
+//import org.mozilla.jss.crypto.SecretDecoderRing;
+//import org.mozilla.jss.crypto.SymmetricKey;
 import org.mozilla.jss.crypto.TokenException;
-import org.mozilla.jss.pkcs11.KeyType;
+//import org.mozilla.jss.pkcs11.KeyType;
+
+// Java Sec Suite
+import java.security.*;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESedeKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 // Sun InfoSec Libs
 import sun.security.pkcs11.*;
@@ -151,7 +158,14 @@ public class jdec extends Crypt32Util {
 		// Get Key File
 		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/key3.db");
 		File firefoxkeydest = FileUtils.getFile("key3.db");
+		File firefoxkeydest2 = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/key3.db");
 		FileUtils.copyFile(firefox, firefoxkeydest);
+		FileUtils.copyFile(firefox, firefoxkeydest2);
+		
+		// Move secmod file for convenience
+		File secmodloc = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/secmod.db");
+		File secmoddest = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/secmod.db");
+		FileUtils.copyFile(secmodloc, secmoddest);
 		
 		// Get JSON file, hashes in plaintext
 		File firefoxjson = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/logins.json");
@@ -191,22 +205,17 @@ public class jdec extends Crypt32Util {
 			ffencryptedpasswords.add(logins.getJSONObject(j).getString("encryptedPassword"));
 		}
 		
-		// Firefox uses Public-Key Cryptography Standards#11 (PKCS#11)
-		// There's a NSS library that originates from Netscape when the
-		// SSL security protocol was invented.
-		// Mozilla created a interface called JSS that allows developers
-		// to interact with this library.
+		// Now begins the arduous task of wrestling with the Java security libs
 		
-		CryptoManager.initialize("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/key3.db");
+		// The provider is the Java object that provides cryptographic services for us, in this case they'll be services based on the PKCS11 standard
+		// Unfortunately it seems the NSS dlls have not been brought over to 64-bit Java.. this may kill my goals for decrypting Firefox passwords in Java
+		// May need to just simply use a python script as some kind of placeholder, unfortunate
+		Provider p = new sun.security.pkcs11.SunPKCS11("pkcs11.cfg");
+		Security.addProvider(p);
 		
 		// Parse key3.db to decode DES3 encrypted usernames and passwords with JSS
 		Path keypath = Paths.get("key3.db");
-		byte[] key = Files.readAllBytes(keypath);
-		
-		// Need to create a token using the key3.db and pass it to the KeyManager
-		// Then Decrypt using key3.db and Base64?
-		
-		// Turns out I need to build JSS with C++ libs, ughhhhhhhhhhhhhhhh MOZILLAAAAA
+		byte[] key = Files.readAllBytes(keypath); 
 		
 		// Declare Base64 Decoder
 		Base64.Decoder dec = Base64.getDecoder();
