@@ -4,6 +4,16 @@ Over time I might expand this to light OS password cracking. Need to do more res
 
 I'm not responsible for how you use this tool.
 
+## 05/10/2016
+   Status:
+   Progress with Firefox is slow, NSS is a complete nightmare to use in Java. Struggling to initialize it
+   and get it up and running. Ended up using nss3.dll which was in the 64-bit Firefox install thankfully.
+   Still struggling to set the config file for the Java NSS library, may try JSS again but ..
+   At this point it would just be easier to simply use a Python script and simply execute it in Java, but that
+   kind of defeats the purpose of the project.
+   
+   Goal: Get NSS initialized
+
 ## 19/09/2016
 
  -- v0.1
@@ -20,10 +30,4 @@ I'm not responsible for how you use this tool.
   2. Run jdec.jar
    
   3. Open output.txt, enjoy your decrypted password chain(s)
-  
 
-Required libraries;
-https://maven.java.net/content/repositories/releases/net/java/dev/jna/jna/4.2.2/jna-4.2.2.jar
-https://maven.java.net/content/repositories/releases/net/java/dev/jna/jna-platform/4.2.2/jna-platform-4.2.2.jar
-https://bitbucket.org/xerial/sqlite-jdbc/downloads
-Apache Commons Lib
