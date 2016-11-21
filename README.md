@@ -4,6 +4,14 @@ Over time I might expand this to light OS password cracking. Need to do more res
 
 I'm not responsible for how you use this tool.
 
+## 21/11/2016
+   Status:
+   Switching to Jython to execute Python script to decrypt Firefox username and passwords. 
+   As far as I can tell Mozilla do not have NSS dlls readily available for my platform so I'm
+   just going to cut my losses and use one of the many Python scripts that are out there. Going
+   to begin work on it tomorrow. Briefly attempted to migrate to C++ with little success, typical of
+   C++ the code has become bloated already and takes probably 20 lines to do what Java or Python can do in 3.
+
 ## 05/10/2016
    Status:
    Progress with Firefox is slow, NSS is a complete nightmare to use in Java. Struggling to initialize it
