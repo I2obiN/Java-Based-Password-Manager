@@ -119,7 +119,6 @@ public class jdec {
 	
 		// Decrypt data
 		while(x != cint) {
-			unencrypted.add(cryptUnprotectData(bytearray.get(x), 0));
 			x++;
 		}
 	
