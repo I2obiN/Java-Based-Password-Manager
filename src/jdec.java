@@ -52,7 +52,7 @@ import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class jdec extends Crypt32Util {
+public class jdec {
 	
 	public static void ChromeDec() throws IOException, SQLException {
 		
