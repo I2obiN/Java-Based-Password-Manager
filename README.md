@@ -1,8 +1,5 @@
 # PasswordRecoveryTool
 Java Password Recovery Tool for Chrome/Firefox/IE.
-Over time I might expand this to light OS password cracking. Need to do more research on Firefox and IE cracking first.
-
-I'm not responsible for how you use this tool.
 
 ## 21/11/2016
    Status:
