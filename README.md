@@ -4,7 +4,7 @@ Java based Password Recovery Tool for Chrome/Firefox/IE.
 ## 12/12/2016
    Status:
    Using https://github.com/Unode/firefox_decrypt to decrypt Firefox passwords. Made executable using py2exe,
-   and I'm simply going to execute that, store the results by redirecting the output and then work from there.
+   and I'm simply going to execute that and the store the results by redirecting the output to a Java structure.
 
 ## 21/11/2016
    Status:
