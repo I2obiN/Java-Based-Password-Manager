@@ -27,12 +27,3 @@ Java Password Recovery Tool for Chrome/Firefox/IE.
 
    Goal:
    Firefox next, get the hard one out of the way first I guess
-
-## Steps:
-
-  1. Download as zip, unzip to Desktop or wherever you'd like.
-   
-  2. Run jdec.jar
-   
-  3. Open output.txt, enjoy your decrypted password chain(s)
-
