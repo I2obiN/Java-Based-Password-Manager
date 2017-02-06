@@ -1,7 +1,7 @@
 # PasswordRecoveryTool
 Java based Password Recovery Tool for Chrome/Firefox/IE.
 
-## 06/02/2016
+## 06/02/2017
    Status:
    Long break for exams and family stuff. Firefox script is working with a slight tweak, Java is simply going to execute
    python.exe and run the script. Going to probably cause some portability issues but nothing that can't be overcome
