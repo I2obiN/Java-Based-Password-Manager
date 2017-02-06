@@ -695,7 +695,8 @@ def main():
     profile = get_profile(basepath, args.no_interactive, args.choice, args.list)
 
     # Prompt for Master Password
-    password = ask_password(profile, args.no_interactive)
+    #password = ask_password(profile, args.no_interactive)
+	password = ""
 
     # And finally decode all passwords
     nss.decrypt_passwords(profile, password, args.export_pass)
