@@ -5,7 +5,8 @@ Java based Password Recovery Tool for Chrome/Firefox/IE.
    Status:
    Long break for exams and family stuff. Firefox script is working with a slight tweak, Java is simply going to execute
    python.exe and run the script. Going to probably cause some portability issues but nothing that can't be overcome
-   ultimately. For our purposes it will do fine.
+   ultimately. For our purposes it will do fine. At this point I'm going to move onto Internet Explorer. Once that is
+   finished I'll look into OS passwords.
 
 ## 12/12/2016
    Status:
