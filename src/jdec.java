@@ -8,14 +8,13 @@ import org.apache.commons.io.FileUtils;
 import com.sun.jna.platform.win32.*;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 // Standard Java IO
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.PrintStream;
 
 // SQLite libraries
@@ -33,10 +32,6 @@ import org.json.simple.parser.ParseException;
 
 // Java Sec Suite
 import java.security.*;
-
-// Jython Libs
-import org.python.core.*;
-import org.python.util.PythonInterpreter;
 
 public class jdec extends Crypt32Util {
 	
@@ -162,13 +157,6 @@ public class jdec extends Crypt32Util {
 		JSONObject ffobj = new JSONObject(ffdata);
 		JSONArray logins = ffobj.getJSONArray("logins");
 		
-		// Execute Python script -- lucky for us this needs very little configuration
-		try{
-		ProcessBuilder pb = new ProcessBuilder("python 'to-do-path' --choice 1 --no-interaction");
-		Process p = pb.start();
-		System.out.print(p.getInputStream());
-		}catch(Exception e){System.out.println(e);}
-		
 		// Put into arrays
 		
 		// URLS
@@ -198,6 +186,36 @@ public class jdec extends Crypt32Util {
 		
 		System.out.println("Firefox usernames and passwords: ");
 		
+		// Execute Python script -- lucky for us this needs very little configuration
+		try{
+		ProcessBuilder pb = new ProcessBuilder(System.getProperty("user.dir").toString() + "\\Python27\\python", "firefox_decrypt.py", "-n");
+		pb.directory(new File(System.getProperty("user.dir") + "\\Python27\\"));
+		Process p = pb.start();
+		
+		BufferedReader output = getOutput(p);
+		BufferedReader error = getError(p);
+		String ligne = "";
+
+		while ((ligne = output.readLine()) != null) {
+		    System.out.println(ligne);
+		}
+
+		while ((ligne = error.readLine()) != null) {
+		 System.out.println(ligne);
+		}
+		
+		p.waitFor();
+		
+		}catch(Exception e){System.out.println(e);}
+		
+	}
+	
+	private static BufferedReader getOutput(Process p) {
+	    return new BufferedReader(new InputStreamReader(p.getInputStream()));
+	}
+
+	private static BufferedReader getError(Process p) {
+	    return new BufferedReader(new InputStreamReader(p.getErrorStream()));
 	}
 	
 	
