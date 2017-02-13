@@ -1,6 +1,12 @@
 # PasswordRecoveryTool
 Java based Password Recovery Tool for Chrome/Firefox/IE.
 
+## 13/02/2017
+   Status:
+   Began implementing Internet Explorer/Edge password recovery function. Microsoft credentials are located in an operating system
+   vault that uses the DPAPI (Win32 API) based encryption. Should be a relatively similar process to Chrome but I'm having difficulty
+   figuring out how to extract the password blobs and decrypt them, although I have found the file location.
+
 ## 06/02/2017
    Status:
    Long break for exams and family stuff. Firefox script is working with a slight tweak, Java is simply going to execute
