@@ -1,4 +1,3 @@
-# PasswordRecoveryTool
 Java based Password Recovery Tool for Chrome/Firefox.
 
 ## 22/02/2017
