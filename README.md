@@ -1,5 +1,10 @@
 # PasswordRecoveryTool
-Java based Password Recovery Tool for Chrome/Firefox/IE.
+Java based Password Recovery Tool for Chrome/Firefox.
+
+## 22/02/2017
+   Status:
+   Going to drop support for Internet Explorer, Microsoft actually have a built-in tool in Windows for recovering credentials from
+   vault. At this point I'm going to refine the code further and begin documentation.
 
 ## 13/02/2017
    Status:
