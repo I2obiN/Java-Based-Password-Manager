@@ -1,4 +1,4 @@
-// Password Scraper for Chrome/Firefox/IE for Windows/Linux/Mac
+// Password Recovery Tool for Chrome/Firefox for Windows
 import java.util.*;
 
 // Apache Libs
@@ -113,78 +113,13 @@ public class jdec extends Crypt32Util {
 	
 		// Print results
 		for(int i = 0; i < cint; i++) {
-		System.out.println(urls[i] + " -- " + usernames[i] + " -- " + passwords[i]);
+		System.out.println("URL: " + urls[i] + " -- Username: " + usernames[i] + " -- Password: " + passwords[i]);
 		}
 	}
 	
 	public static void FirefoxDec() throws IOException, ParseException, GeneralSecurityException {
 		
-		// Get username
-		String user = System.getProperty("user.name");
-
-		// Firefox -- Uses a decryption key in the Mozilla folder which we need to use, password file is in JSON format
-		File firefoxloc = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles");
-		String[] fuckfirefox = firefoxloc.list();
-		String userloc = new String();
-	
-		// Search for profile default login, potentially other usernames but most people will use default Firefox profile
-		for(String directory : fuckfirefox){
-			if(directory.contains(".default")){
-				userloc = directory;
-			}
-		}
-	
-		// Get Key File
-		File firefox = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/key3.db");
-		File firefoxkeydest = FileUtils.getFile("key3.db");
-		File firefoxkeydest2 = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/key3.db");
-		FileUtils.copyFile(firefox, firefoxkeydest);
-		FileUtils.copyFile(firefox, firefoxkeydest2);
-		
-		// Move secmod file for convenience
-		File secmodloc = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/secmod.db");
-		File secmoddest = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/secmod.db");
-		FileUtils.copyFile(secmodloc, secmoddest);
-		
-		// Get JSON file, hashes in plaintext
-		File firefoxjson = FileUtils.getFile("C:/Users/" + user + "/AppData/Roaming/Mozilla/Firefox/Profiles/" + userloc + "/logins.json");
-		File firefoxjdest = FileUtils.getFile("logins.json");
-		FileUtils.copyFile(firefoxjson, firefoxjdest);
-		
-		// Parse
-		JSONParser parser = new JSONParser();
-		Object jffobj = parser.parse(new FileReader("logins.json"));
-		String ffdata = jffobj.toString();
-		JSONObject ffobj = new JSONObject(ffdata);
-		JSONArray logins = ffobj.getJSONArray("logins");
-		
-		// Put into arrays
-		
-		// URLS
-		ArrayList<String> ffurls = new ArrayList<String>();
-		// Encrypted Usernames + Passwords
-		ArrayList<String> ffencryptedusernames = new ArrayList<String>();
-		ArrayList<String> ffencryptedpasswords = new ArrayList<String>();
-		// Decrypted Usernames + Passwords
-		ArrayList<String> ffdecryptedusernames = new ArrayList<String>();
-		ArrayList<String> ffdecryptedpasswords = new ArrayList<String>();
-		
-		// Get websites
-		for(int j = 0; j < logins.length(); j++){
-			ffurls.add(logins.getJSONObject(j).getString("hostname"));
-			System.out.println("URL: " + logins.getJSONObject(j).getString("hostname"));
-		}
-		
-		// Get encrypted usernames
-		for(int j = 0; j < logins.length(); j++){
-			ffencryptedusernames.add(logins.getJSONObject(j).getString("encryptedUsername"));
-		}
-		
-		// Get encrypted passwords
-		for(int j = 0; j < logins.length(); j++){
-			ffencryptedpasswords.add(logins.getJSONObject(j).getString("encryptedPassword"));
-		}
-		
+		System.out.println();
 		System.out.println("Firefox usernames and passwords: ");
 		
 		// Execute Python script -- lucky for us this needs very little configuration
@@ -211,41 +146,6 @@ public class jdec extends Crypt32Util {
 		
 	}
 	
-	public static void InternetExplorerDec() throws IOException{
-		
-		// Get username
-		String user = System.getProperty("user.name");
-		
-		File ie = new File("C:\\Users\\" + user + "\\AppData\\Local\\Microsoft\\Vault\\");
-		String[] iedirlist = ie.list();
-		String iedir = iedirlist[0];
-		File ieblobfolder = new File("C:\\Users\\" + user + "\\AppData\\Local\\Microsoft\\Vault\\" + iedir + "\\");
-		String[] iebloblist = ieblobfolder.list();
-		ArrayList<String> bloblist = new ArrayList<String>();
-		// Remove files we don't need
-		for(String x : iebloblist){ if(!x.contains("vpol") && !x.contains("vsch")){ bloblist.add(x); } }
-		String[] newbloblist = bloblist.toArray(new String[bloblist.size()]);
-		
-		// Get paths for BLOBS and dec data array
-		Path[] blobpaths = new Path[newbloblist.length];
-		byte[][] blobdata = new byte[blobpaths.length][1024]; // Most blobs seem to be < 1KB
-		
-		// Put blobs into Java byte array
-		for(int j = 0; j < blobpaths.length; j++){
-		blobpaths[j] = Paths.get(ieblobfolder.getAbsolutePath().toString() + "\\" + newbloblist[j]);
-		blobdata[j] = Files.readAllBytes(blobpaths[j]);
-		}
-		
-		// Array for unencrypted bytes
-		ArrayList<byte[]> unencrypted = new ArrayList<byte[]>();
-		
-		for(byte[] x : blobdata){
-			unencrypted.add(cryptUnprotectData(x, 0));
-		}
-
-		
-	}
-	
 	private static BufferedReader getOutput(Process p) {
 	    return new BufferedReader(new InputStreamReader(p.getInputStream()));
 	}
@@ -263,7 +163,6 @@ public class jdec extends Crypt32Util {
 		
 		ChromeDec();
 		FirefoxDec();
-		InternetExplorerDec();
 		System.out.println("Done");
 	}
 }
