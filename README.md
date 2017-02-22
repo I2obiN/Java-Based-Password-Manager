@@ -43,10 +43,5 @@ Java based Password Recovery Tool for Chrome/Firefox.
    Goal: Get NSS initialized
 
 ## 19/09/2016
-
- -- v0.1
    Status:
    jar file will decrypt Chrome passwords and output to text file in working directory
-
-   Goal:
-   Firefox next, get the hard one out of the way first I guess
