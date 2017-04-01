@@ -1,4 +1,8 @@
-Java based Password Recovery Tool for Chrome/Firefox.
+Java based Password Management Tool
+
+## 01/04/2017
+   Status:
+   Going to make this into more of a very basic password management tool. I've updated it significantly since the last update.
 
 ## 22/02/2017
    Status:
