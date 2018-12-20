@@ -1,4 +1,4 @@
-Java based Password Management Tool
+Java based Password Management Tool I made for a College project, pretty rough but somewhat functional
 
 ## 01/04/2017
    Status:
